@@ -1,0 +1,12 @@
+{
+  "compile-hero.disable-compile-files-on-did-save-code": false,
+  "github.copilot.nextEditSuggestions.enabled": true,
+  "github.copilot.chat.codesearch.enabled": true,
+  "github.copilot.chat.agent.thinkingTool": true,
+  "githubPullRequests.experimental.useQuickChat": true,
+  "githubPullRequests.experimental.chat": true,
+  "editor.formatOnSave": true,
+  "files.autoSave": "afterDelay",
+  "livePreview.debugOnExternalPreview": true,
+  "livePreview.tasks.runTaskWithExternalPreview": true
+}

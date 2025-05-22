@@ -1,0 +1,15 @@
+{
+  "confirmation": "Confirmación",
+  "confirm": "Confirmar",
+  "cancel": "Cancelar",
+  "save": "Guardar",
+  "delete": "Eliminar",
+  "edit": "Editar",
+  "patient": {
+    "actions": "Acciones del Paciente",
+    "deleteConfirmation": {
+      "title": "Eliminar Paciente",
+      "message": "¿Está seguro que desea eliminar este paciente? Esta acción no se puede deshacer."
+    }
+  }
+}

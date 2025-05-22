@@ -1,0 +1,17 @@
+[
+  {
+    "origin": [
+      "http://localhost:3000",
+      "https://localhost:3000",
+      "http://127.0.0.1:3000",
+      "https://127.0.0.1:3000",
+      "https://pr-quality.web.app",
+      "https://pr-quality.firebaseapp.com",
+      "https://altamedica.com",
+      "https://*.vercel.app"
+    ],
+    "method": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    "responseHeader": ["Content-Type", "Authorization", "X-Goog-Resumable", "Content-Range", "Access-Control-Allow-Origin"],
+    "maxAgeSeconds": 3600
+  }
+]

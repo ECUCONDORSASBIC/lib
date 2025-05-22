@@ -1,0 +1,49 @@
+{
+  "videoConsultation": {
+    "title": "Video Consultation",
+    "experimental": "Experimental Feature",
+    "experimentalWarning": "This feature is in beta testing. Use with caution for clinical cases.",
+    "connecting": "Connecting to consultation...",
+    "waitingForParticipants": "Waiting for other participants to join...",
+    "connectionIssues": "There may be connection issues",
+    "endCall": "End Call",
+    "toggleVideo": {
+      "on": "Turn camera off",
+      "off": "Turn camera on"
+    },
+    "toggleAudio": {
+      "on": "Mute microphone",
+      "off": "Unmute microphone"
+    },
+    "toggleScreen": {
+      "on": "Stop screen sharing",
+      "off": "Share screen"
+    },
+    "toggleChat": {
+      "on": "Hide chat",
+      "off": "Show chat"
+    },
+    "networkQuality": {
+      "good": "Good",
+      "fair": "Fair",
+      "poor": "Poor",
+      "label": "Network quality"
+    },
+    "participants": "participants",
+    "errorMessages": {
+      "sessionNotFound": "Telemedicine session not found",
+      "connectionFailed": "Failed to connect to the video room",
+      "permissionDenied": "Camera or microphone permissions denied",
+      "roomCreationFailed": "Could not create consultation room",
+      "unknownError": "An error occurred during the video consultation",
+      "endCallFailed": "Error ending call"
+    },
+    "chatPlaceholder": "Type your message...",
+    "sendMessage": "Send",
+    "noMessagesYet": "No messages yet",
+    "sessionCompleted": "This consultation has ended",
+    "goBack": "Go Back",
+    "connected": "Connected",
+    "disconnected": "Disconnected"
+  }
+}

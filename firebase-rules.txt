@@ -1,0 +1,204 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Funciones de utilidad para validación
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isUserAuthenticated(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }    function isDoctor() {
+      return isAuthenticated() &&
+        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'doctor' || 
+         request.auth.token.role == 'doctor');
+    }
+
+    function isAdmin() {
+      return isAuthenticated() &&
+        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+         request.auth.token.role == 'admin');
+    }
+
+    function isEmployer() {
+      return isAuthenticated() &&
+        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'employer' ||
+         request.auth.token.role == 'employer');
+    }
+
+    function isPatient() {
+      return isAuthenticated() &&
+        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'patient' ||
+         request.auth.token.role == 'patient');
+    }
+
+    // Función para verificar si un doctor puede acceder a datos de un paciente
+    function isPatientDoctor(patientId) {
+      return isDoctor() &&
+        exists(/databases/$(database)/documents/doctorPatients/$(request.auth.uid)_$(patientId));
+    }
+
+    // Reglas para la colección de usuarios
+    match /users/{userId} {
+      // Cualquier usuario autenticado puede leer su propio perfil
+      // Los doctores pueden leer perfiles de cualquier usuario
+      // Los administradores pueden leer perfiles de cualquier usuario
+      allow read: if isUserAuthenticated(userId) || isDoctor() || isAdmin();
+
+      // Los usuarios solo pueden actualizar su propio perfil
+      // Los administradores pueden actualizar cualquier perfil
+      allow update: if isUserAuthenticated(userId) || isAdmin();
+
+      // Solo administradores pueden crear o eliminar usuarios
+      allow create, delete: if isAdmin();
+    }
+
+    // Reglas para la colección de pacientes
+    match /patients/{patientId} {
+      // Los pacientes pueden leer su propio perfil
+      // Los doctores pueden leer perfiles de sus pacientes
+      // Los administradores pueden leer cualquier perfil
+      allow read: if isUserAuthenticated(patientId) || isPatientDoctor(patientId) || isAdmin();
+
+      // Los pacientes pueden actualizar su propio perfil
+      // Los doctores pueden actualizar perfiles de sus pacientes
+      // Los administradores pueden actualizar cualquier perfil
+      allow update: if isUserAuthenticated(patientId) || isPatientDoctor(patientId) || isAdmin();
+
+      // Solo doctores y administradores pueden crear perfiles de pacientes
+      allow create: if isDoctor() || isAdmin();
+
+      // Solo administradores pueden eliminar perfiles de pacientes
+      allow delete: if isAdmin();
+
+      // Subcollección de anamnesis
+      match /anamnesis/{anamnesisId} {
+        // Los pacientes pueden leer su propia anamnesis
+        // Los doctores pueden leer anamnesis de sus pacientes
+        // Los administradores pueden leer cualquier anamnesis
+        allow read: if isUserAuthenticated(patientId) || isPatientDoctor(patientId) || isAdmin();
+
+        // Los pacientes pueden crear/actualizar su propia anamnesis
+        // Los doctores pueden crear/actualizar anamnesis de sus pacientes
+        allow create, update: if isUserAuthenticated(patientId) || isPatientDoctor(patientId);
+
+        // Solo administradores pueden eliminar anamnesis
+        allow delete: if isAdmin();
+      }
+
+      // Subcollección de datos médicos
+      match /medical/{docId} {
+        // Los pacientes pueden leer sus propios datos médicos
+        // Los doctores pueden leer datos médicos de sus pacientes
+        allow read: if isUserAuthenticated(patientId) || isPatientDoctor(patientId) || isAdmin();
+
+        // Solo doctores pueden crear/actualizar datos médicos
+        allow write: if isPatientDoctor(patientId) || isAdmin();
+      }
+    }
+
+    // Relación doctor-paciente
+    match /doctorPatients/{relationId} {
+      // Los doctores y pacientes involucrados en la relación pueden leer
+      allow read: if isAuthenticated() &&
+        (request.auth.uid == resource.data.doctorId || request.auth.uid == resource.data.patientId);
+
+      // Solo doctores y administradores pueden crear relaciones
+      allow create: if isDoctor() || isAdmin();
+
+      // Solo el doctor involucrado o un administrador puede eliminar la relación
+      allow delete: if isAuthenticated() &&
+        (request.auth.uid == resource.data.doctorId || isAdmin());
+    }
+
+    // Citas
+    match /appointments/{appointmentId} {
+      // El paciente y doctor involucrados pueden leer la cita
+      allow read: if isAuthenticated() &&
+        (request.auth.uid == resource.data.patientId ||
+         request.auth.uid == resource.data.doctorId);
+
+      // Solo doctores pueden crear citas
+      allow create: if isDoctor();
+
+      // El doctor asignado puede actualizar la cita
+      // El paciente puede actualizar campos específicos (ej: confirmación)
+      allow update: if isAuthenticated() && (
+        request.auth.uid == resource.data.doctorId ||
+        (request.auth.uid == resource.data.patientId &&
+         request.resource.data.diff(resource.data).affectedKeys()
+         .hasOnly(['patientConfirmed', 'patientNotes']))
+      );
+
+      // Solo el doctor asignado puede eliminar la cita
+      allow delete: if isAuthenticated() && request.auth.uid == resource.data.doctorId;
+    }
+
+    // Alertas
+    match /alerts/{alertId} {
+      // El destinatario puede leer sus alertas
+      allow read: if isAuthenticated() &&
+        (request.auth.uid == resource.data.patientId ||
+         request.auth.uid == resource.data.doctorId);
+
+      // Cualquier usuario autenticado puede crear alertas
+      // (pero los campos deben ser validados)
+      allow create: if isAuthenticated() && request.resource.data.createdBy == request.auth.uid;
+
+      // El destinatario puede marcar como leída
+      allow update: if isAuthenticated() &&
+        (request.auth.uid == resource.data.patientId ||
+         request.auth.uid == resource.data.doctorId) &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read', 'readAt']);
+
+      // Solo el creador o un administrador puede eliminar
+      allow delete: if isAuthenticated() &&
+        (request.auth.uid == resource.data.createdBy || isAdmin());
+    }
+    
+    // Videollamadas (telemedicina)
+    match /calls/{callId} {
+      // Los participantes pueden leer la llamada
+      allow read: if isAuthenticated() &&
+        (request.auth.uid == resource.data.callerId ||
+         request.auth.uid == resource.data.recipientId);
+
+      // Cualquier usuario autenticado puede crear una llamada
+      allow create: if isAuthenticated() && request.resource.data.callerId == request.auth.uid;
+
+      // Los participantes pueden actualizar la llamada (para responder, terminar, etc.)
+      allow update: if isAuthenticated() &&
+        (request.auth.uid == resource.data.callerId ||
+         request.auth.uid == resource.data.recipientId);
+
+      // Solo el creador o el administrador puede eliminar la llamada
+      allow delete: if isAuthenticated() &&
+        (request.auth.uid == resource.data.callerId || isAdmin());
+        
+      // Colección para los candidatos ICE del que llama
+      match /callerCandidates/{candidateId} {
+        allow read: if isAuthenticated() &&
+          (request.auth.uid == get(/databases/$(database)/documents/calls/$(callId)).data.callerId ||
+           request.auth.uid == get(/databases/$(database)/documents/calls/$(callId)).data.recipientId);
+          
+        allow write: if isAuthenticated() &&
+          request.auth.uid == get(/databases/$(database)/documents/calls/$(callId)).data.callerId;
+      }
+      
+      // Colección para los candidatos ICE del destinatario
+      match /calleeCandidates/{candidateId} {
+        allow read: if isAuthenticated() &&
+          (request.auth.uid == get(/databases/$(database)/documents/calls/$(callId)).data.callerId ||
+           request.auth.uid == get(/databases/$(database)/documents/calls/$(callId)).data.recipientId);
+        
+        allow write: if isAuthenticated() &&
+          request.auth.uid == get(/databases/$(database)/documents/calls/$(callId)).data.recipientId;
+      }
+    }
+
+    // Reglas predeterminadas - denegar todo lo demás
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

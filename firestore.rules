@@ -1,0 +1,75 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Función que verifica si el usuario está autenticado y tiene email verificado
+    function isAuthenticatedWithVerifiedEmail() {
+      return request.auth != null && request.auth.token.email_verified == true;
+    }
+    
+    // Función que verifica si el usuario es propietario del documento
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+    
+    // Función que verifica si el usuario tiene rol médico o admin
+    function hasAuthorizedRole() {
+      return request.auth.token.role in ['medico', 'admin'];
+    }
+    
+    // Reglas para la colección de anamnesis
+    match /anamnesis/{patientId} {
+      // Solo permitir lectura/escritura si:
+      // 1. Usuario autenticado con email verificado
+      // 2. Usuario es el paciente (dueño del documento) O tiene rol médico/admin
+      allow read, write: if 
+        isAuthenticatedWithVerifiedEmail() &&
+        (isOwner(patientId) || hasAuthorizedRole());
+        
+      // Historial de versiones de anamnesis (subcollection)
+      match /anamnesis_history/{documentId} {
+        allow read, write: if 
+          isAuthenticatedWithVerifiedEmail() &&
+          (isOwner(patientId) || hasAuthorizedRole());
+      }
+    }
+    
+    // Reglas para telemedicina
+    match /telemedicine_sessions/{sessionId} {
+      allow read, write: if 
+        isAuthenticatedWithVerifiedEmail() &&
+        (isOwner(resource.data.patientId) || 
+         isOwner(resource.data.doctorId) || 
+         hasAuthorizedRole());
+    }
+    
+    // Reglas para mensajes de chat
+    match /chat_messages/{messageId} {
+      allow read: if 
+        isAuthenticatedWithVerifiedEmail() &&
+        (isOwner(resource.data.senderId) || 
+         isOwner(resource.data.receiverId) || 
+         hasAuthorizedRole());
+         
+      allow write: if 
+        isAuthenticatedWithVerifiedEmail();
+    }
+    
+    // Reglas para perfiles de usuarios
+    match /users/{userId} {
+      // Cualquier usuario autenticado puede leer perfiles básicos
+      allow read: if request.auth != null;
+      
+      // Solo el propio usuario o admin puede escribir su perfil
+      allow write: if 
+        isAuthenticatedWithVerifiedEmail() &&
+        (isOwner(userId) || hasAuthorizedRole());
+    }
+    
+    // Reglas para cualquier otra colección - acceso restringido
+    match /{document=**} {
+      allow read, write: if 
+        isAuthenticatedWithVerifiedEmail() && 
+        hasAuthorizedRole();
+    }
+  }
+}

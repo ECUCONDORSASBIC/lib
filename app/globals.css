@@ -1,0 +1,91 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Import theme overrides */
+@import './theme-overrides.css';
+
+:root {
+  /* Paleta de colores claros para toda la plataforma */
+  --primary: #60a5fa; /* azul claro */
+  --primary-light: #93c5fd; /* azul muy claro */
+  --primary-dark: #3b82f6; /* azul medio */
+  --secondary: #a5b4fc; /* morado claro */
+  --accent: #67e8f9; /* cyan claro */
+  --background: #f8fafc; /* fondo principal (casi blanco) */
+  --background-alt: #f1f5f9; /* fondo alternativo */
+  --foreground: #334155; /* texto principal (azul grisáceo) */
+  --foreground-light: #64748b; /* texto secundario */
+  --success: #86efac; /* verde claro */
+  --warning: #fcd34d; /* amarillo claro */
+  --error: #fda4af; /* rojo claro */
+  --info: #93c5fd; /* azul informativo claro */
+  --focus-ring: #bae6fd; /* borde de enfoque */
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+}
+
+@layer base {
+  html {
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+@layer components {
+  .form-input {
+    @apply w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm outline-none focus: focus:ring-sky-100 focus:border-sky-300;
+  }
+
+  .form-label {
+    @apply block mb-1 text-sm font-medium text-gray-700;
+  }
+
+  .form-help {
+    @apply mt-1 text-xs text-gray-500;
+  }
+
+  input,
+  textarea,
+  select {
+    @apply text-gray-900 !important;
+    caret-color: #7DD3FC;
+    transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  }
+
+  input:focus,
+  textarea:focus,
+  select:focus {
+    @apply border-sky-300 ring-2 ring-sky-100 !important;
+    outline: none;
+  }
+
+  /* Google-style floating label effect */
+  .input-container {
+    position: relative;
+  }
+
+  .input-container input:focus+label,
+  .input-container input:not(:placeholder-shown)+label {
+    transform: translateY(-1.5rem) scale(0.85);
+    color: #7DD3FC;
+  }
+}
+
+@keyframes modal-scale-up {
+  0% {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-modal-scale-up {
+  animation: modal-scale-up 0.2s ease-out forwards;
+}

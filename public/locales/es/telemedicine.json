@@ -1,0 +1,49 @@
+{
+  "videoConsultation": {
+    "title": "Videoconsulta",
+    "experimental": "Funcionalidad Experimental",
+    "experimentalWarning": "Esta función está en pruebas beta. Utilizar con precaución para casos clínicos.",
+    "connecting": "Conectando a la consulta...",
+    "waitingForParticipants": "Esperando a que otros participantes se unan...",
+    "connectionIssues": "Pueden haber problemas de conexión",
+    "endCall": "Finalizar Llamada",
+    "toggleVideo": {
+      "on": "Desactivar cámara",
+      "off": "Activar cámara"
+    },
+    "toggleAudio": {
+      "on": "Silenciar micrófono",
+      "off": "Activar micrófono"
+    },
+    "toggleScreen": {
+      "on": "Dejar de compartir pantalla",
+      "off": "Compartir pantalla"
+    },
+    "toggleChat": {
+      "on": "Ocultar chat",
+      "off": "Mostrar chat"
+    },
+    "networkQuality": {
+      "good": "Buena",
+      "fair": "Regular",
+      "poor": "Baja",
+      "label": "Calidad de red"
+    },
+    "participants": "participantes",
+    "errorMessages": {
+      "sessionNotFound": "No se encontró la sesión de telemedicina",
+      "connectionFailed": "No se pudo conectar a la sala de video",
+      "permissionDenied": "Permisos de cámara o micrófono denegados",
+      "roomCreationFailed": "No se pudo crear la sala de consulta",
+      "unknownError": "Ocurrió un error durante la videoconsulta",
+      "endCallFailed": "Error al finalizar la llamada"
+    },
+    "chatPlaceholder": "Escribe tu mensaje...",
+    "sendMessage": "Enviar",
+    "noMessagesYet": "Aún no hay mensajes",
+    "sessionCompleted": "Esta consulta ha finalizado",
+    "goBack": "Volver",
+    "connected": "Conectado",
+    "disconnected": "Desconectado"
+  }
+}
