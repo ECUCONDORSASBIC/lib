@@ -2,6 +2,8 @@ A continuación, se presenta un **README profesional y completo** para tu plataf
 
 ---
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/e71f5d2c76d94959b8800f72159e2562)](https://app.codacy.com/gh/ECUCONDORSASBIC/lib?utm_source=github.com&utm_medium=referral&utm_content=ECUCONDORSASBIC/lib&utm_campaign=Badge_Grade)
+
 ````markdown
 # 🩺 PR Quality — Plataforma de Gestión Médica Inteligente
 
